@@ -12,6 +12,8 @@ import tqdm
 
 from torch.backends import cudnn
 import gc
+# from run import outf
+# import run
 
 def extract_features(model, data_loader, print_freq=1, metric=None):
     cudnn.benchmark = False
@@ -81,6 +83,9 @@ def evaluate_all(distmat, query=None, gallery=None,
 
     # Compute mean AP
     mAP = mean_ap(distmat, query_ids, gallery_ids, query_cams, gallery_cams)
+    outf = open("requeir_data.txt", "a")
+    outf.write("{:4.1%} ".format(mAP))
+
     print('Mean AP: {:4.1%}'.format(mAP))
 
     # Compute all kinds of CMC scores
@@ -100,6 +105,7 @@ def evaluate_all(distmat, query=None, gallery=None,
 
     print('CMC Scores:')
     for k in cmc_topk:
+        outf.write("{:12.1%} ".format(cmc_scores['market1501'][k - 1]))
         print('  top-{:<4}{:12.1%}'
               .format(k, 
 #                      cmc_scores['allshots'][k - 1],
@@ -107,6 +113,7 @@ def evaluate_all(distmat, query=None, gallery=None,
                       cmc_scores['market1501'][k - 1]))
 
     # Use the allshots cmc top-1 score for validation criterion
+    outf.close()
     return cmc_scores['market1501'][0]
 
 

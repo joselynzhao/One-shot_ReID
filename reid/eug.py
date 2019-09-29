@@ -13,6 +13,10 @@ from reid.utils.data import transforms as T
 from torch.utils.data import DataLoader
 from reid.utils.data.preprocessor import Preprocessor
 import random
+# from run import outf
+# import run
+
+
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -185,6 +189,9 @@ class EUG():
 
         print("{} predictions on all the unlabeled data: {} of {} is correct, accuracy = {:0.3f}".format(
             self.mode, num_correct_pred, u_feas.shape[0], num_correct_pred/u_feas.shape[0]))
+        outf = open("requeir_data.txt", "a")
+        outf.write("{} {} {:0.3f} ".format(num_correct_pred,u_feas.shape[0],num_correct_pred/u_feas.shape[0]))
+        outf.close()
         return labels, scores
 
 
@@ -232,6 +239,9 @@ class EUG():
         new_train_data = self.l_data + seletcted_data
         print("selected pseudo-labeled data: {} of {} is correct, accuracy: {:0.4f}  new train data: {}".format(
                 correct, len(seletcted_data), acc, len(new_train_data)))
+        outf = open("requeir_data.txt", "a")
+        outf.write("{} {} {:0.4f} {}\n".format(correct, len(seletcted_data), acc, len(new_train_data)))
+        outf.close()
 
         return new_train_data
 
