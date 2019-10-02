@@ -1,5 +1,5 @@
 # run DukeMTMC-VideoReID
-python3.6 run.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_EF_30_q_0.4/ --EF 30 --q 0.4 --mode Dissimilarity --max_frames 400 --resume logs/DukeMTMC_VideoReID_EF_30_q_0.4/
+python3.6 run2.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_AP_bs_50/  --mode Dissimilarity --max_frames 400  --bs 50
 #python3.6 run.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_EF_20_q_1/ --EF 20 --q 1.5 --mode Dissimilarity --max_frames 100 --resume logs/DukeMTMC_VideoReID_EF_20_q_1/
 
 # run mars

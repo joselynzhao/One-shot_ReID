@@ -16,7 +16,10 @@ from torch import nn
 import time
 import math
 import pickle
-# global outf
+
+
+import  matplotlib.pyplot as plt
+
 
 
 def resume(args):
@@ -48,6 +51,7 @@ def resume(args):
 
 
 def main(args):
+    # gd = gif_drawer2()
     cudnn.benchmark = True
     cudnn.enabled = True
     save_path = args.logs_dir
@@ -76,8 +80,7 @@ def main(args):
     new_train_data = l_data
     # isout = 0  #用来标记是否应该结束训练
     for step in range(total_step):
-        outf = open("requeir_data.txt", "a")
-        outf.write("{}/{} ".format(step+1,total_step))
+
         # for resume
         if step < resume_step: # resume 想表达的是接着训练的意思
             continue
@@ -96,22 +99,19 @@ def main(args):
             nums_to_select = len(u_data)
             # 取最小值的原因是因为，最多也就是把所有未带标签的数据全部加进去
 
-        outf.write("{} ".format(nums_to_select))
-        outf.close()
+
         print("This is running {} with k={}%, step {}/{}:\t Nums_to_be_select {}, \t Logs-dir {}".format(
                 args.mode, args.k, step + 1, total_step, nums_to_select, save_path))
 
-
+        gd.draw(step+1,nums_to_select)
         # train the model or load ckpt
-        eug.train(new_train_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(ckpt_file, step)
+        eug.train(new_train_data, step, epochs=2, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(ckpt_file, step)
         print("joselyn msg: traning is over")
 
         # evluate
         eug.evaluate(dataset_all.query, dataset_all.gallery)
 
         print("joselyn msg: evaluate is over")
-
-
 
         # pseudo-label and confidence sc
         pred_y, pred_score = eug.estimate_label()

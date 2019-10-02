@@ -189,10 +189,7 @@ class EUG():
 
         print("{} predictions on all the unlabeled data: {} of {} is correct, accuracy = {:0.3f}".format(
             self.mode, num_correct_pred, u_feas.shape[0], num_correct_pred/u_feas.shape[0]))
-        outf = open("requeir_data.txt", "a")
-        outf.write("{} {} {:0.3f} ".format(num_correct_pred,u_feas.shape[0],num_correct_pred/u_feas.shape[0]))
-        outf.close()
-        return labels, scores
+        return labels, scores,num_correct_pred/u_feas.shape[0]
 
 
     def estimate_label(self):
@@ -201,7 +198,7 @@ class EUG():
 
         if self.mode == "Dissimilarity": 
             # predict label by dissimilarity cost
-            [pred_label, pred_score] = self.get_Dissimilarity_result()
+            [pred_label, pred_score,label_pre] = self.get_Dissimilarity_result()
 
         elif self.mode == "Classification": 
             # predict label by classification
@@ -209,7 +206,7 @@ class EUG():
         else:
             raise ValueError
 
-        return pred_label, pred_score
+        return pred_label, pred_score,label_pre
 
 
 
@@ -239,11 +236,8 @@ class EUG():
         new_train_data = self.l_data + seletcted_data
         print("selected pseudo-labeled data: {} of {} is correct, accuracy: {:0.4f}  new train data: {}".format(
                 correct, len(seletcted_data), acc, len(new_train_data)))
-        outf = open("requeir_data.txt", "a")
-        outf.write("{} {} {:0.4f} {}\n".format(correct, len(seletcted_data), acc, len(new_train_data)))
-        outf.close()
 
-        return new_train_data
+        return new_train_data,acc
 
     def resume(self, ckpt_file, step):
         print("continued from step", step)
@@ -254,7 +248,7 @@ class EUG():
     def evaluate(self, query, gallery):
         test_loader = self.get_dataloader(list(set(query) | set(gallery)), training = False)
         evaluator = Evaluator(self.model)
-        evaluator.evaluate(test_loader, query, gallery)
+        return  evaluator.evaluate(test_loader, query, gallery)
 
 
 
