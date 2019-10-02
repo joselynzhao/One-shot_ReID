@@ -109,7 +109,7 @@ def main(args):
     cudnn.enabled = True
     save_path = args.logs_dir
     total_step = math.ceil(math.pow((100 / args.EF), (1 / args.q))) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
-    sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.bs) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'))
+    sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'))
 
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
@@ -135,38 +135,27 @@ def main(args):
     top_list = []  # top1
     isout = 0  #用来标记是否应该结束训练
     while(not isout):
-        print("This is running {} with base_size ={}%, step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
-            args.mode, args.bs, step, nums_to_select, save_path))
-        eug.train(new_train_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
+            args.mode, args.EF, args.q, step, nums_to_select, save_path))
+        eug.train(new_train_data, step, epochs=2, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         print("joselyn msg: ------------------------------------------------------traning is over")
         # evluate
         mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
-        top_list.append(top1)
+        # top_list.append(top1)
         step_size.append(nums_to_select)
         if nums_to_select==len(u_data):
             isout=1
         print("joselyn msg: ------------------------------------------------------evaluate is over")
 
         # pseudo-label and confidence sc
-        if(step==0): #初始化k0
-            global k0
-            k0 = 1-top1
-            print("joselyn msg: ------------k0 = {}".format(k0))
-            nums_to_select = base_step
+        nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100),
+                             len(u_data))  # 指数渐进策略
 
-        else:
-            k = (top1-top_list[step-1])/step_size[step]
-            delta_k = max(k-k0,-1)  # 可以在这里尝试除以k0，k0是不会等于0的
-            print("joselyn msg: ------------new k = {}  delta_k = {}".format(k,delta_k))
-            nums_to_select = step_size[step]+ math.floor(base_step*(1+delta_k))+1 # 这个值必须是整数
-            if nums_to_select>len(u_data):
-                nums_to_select = len(u_data)
-
-        pred_y, pred_score,label_pre = eug.estimate_label()
+        pred_y, pred_score,label_pre,id_num= eug.estimate_label()
         print("joselyn msg: estimate labels is over")
         # select data
-        selected_idx = eug.select_top_data(pred_score, nums_to_select)
+        selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data)
         print("joselyn msg: select top data is over")
         # add new data
         new_train_data,select_pre = eug.generate_new_train_data(selected_idx, pred_y)
@@ -196,9 +185,9 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--iter-step', type=int, default=5)
     parser.add_argument('-g', '--gamma', type=float, default=0.3)
     parser.add_argument('-l', '--l', type=float)
-    # parser.add_argument('--EF', type=float, default=5)
-    # parser.add_argument('--q', type=float, default=1)  # 指数参数
-    # parser.add_argument('--k', type=float, default=15)
+    parser.add_argument('--EF', type=float, default=5)
+    parser.add_argument('--q', type=float, default=1)  # 指数参数
+    parser.add_argument('--k', type=float, default=15)
     parser.add_argument('--bs', type=int, default=50)
     working_dir = os.path.dirname(os.path.abspath(__file__))
     parser.add_argument('--data_dir', type=str, metavar='PATH',

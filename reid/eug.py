@@ -15,6 +15,7 @@ from reid.utils.data.preprocessor import Preprocessor
 import random
 # from run import outf
 # import run
+import  math
 
 
 import ssl
@@ -174,7 +175,10 @@ class EUG():
 
         scores = np.zeros((u_feas.shape[0]))
         labels = np.zeros((u_feas.shape[0]))
+        # 分别用来存 _ufeas的分数和标签
 
+        id_num = {}  #以标签名称作为字典
+        # a = 1
         num_correct_pred = 0
         for idx, u_fea in enumerate(u_feas):
             diffs = l_feas - u_fea
@@ -182,14 +186,27 @@ class EUG():
             index_min = np.argmin(dist)
             scores[idx] = - dist[index_min]  # "- dist" : more dist means less score
             labels[idx] = self.l_label[index_min] # take the nearest labled neighbor as the prediction label
-
+            # if a:
+            #     print("labels :-------------------------------------------", labels[idx])
+            #     a = 0
+            #     输出的结果是0.0
             # count the correct number of Nearest Neighbor prediction
             if self.u_label[idx] == labels[idx]:
                 num_correct_pred +=1
+            # 统计各个id的数量
+            if str(labels[idx]) in id_num.keys():
+                id_num[str(labels[idx])]=id_num[str(labels[idx])]+1 #值加1
+            else:
+                id_num[str(labels[idx])] =1
+
 
         print("{} predictions on all the unlabeled data: {} of {} is correct, accuracy = {:0.3f}".format(
             self.mode, num_correct_pred, u_feas.shape[0], num_correct_pred/u_feas.shape[0]))
-        return labels, scores,num_correct_pred/u_feas.shape[0]
+
+        sorted(id_num.items(),key = lambda item:item[1])
+        # print("id_num:--------------------------------------------id_num----------------- ")
+        # print(id_num)
+        return labels, scores,num_correct_pred/u_feas.shape[0],id_num
 
 
     def estimate_label(self):
@@ -198,7 +215,7 @@ class EUG():
 
         if self.mode == "Dissimilarity": 
             # predict label by dissimilarity cost
-            [pred_label, pred_score,label_pre] = self.get_Dissimilarity_result()
+            [pred_label, pred_score,label_pre,id_num] = self.get_Dissimilarity_result()
 
         elif self.mode == "Classification": 
             # predict label by classification
@@ -206,15 +223,26 @@ class EUG():
         else:
             raise ValueError
 
-        return pred_label, pred_score,label_pre
+        return pred_label, pred_score,label_pre,id_num
 
 
 
-    def select_top_data(self, pred_score, nums_to_select):
+    def select_top_data(self, pred_score, nums_to_select,id_num,pred_y,u_data):
+        total_number = 0
+        for item in id_num:
+            id_num[item] = round(id_num[item] * nums_to_select / len(u_data))  #向下取整/ 四舍五入
+            total_number = total_number+id_num[item]
+
+        print("nums_to_select vs total_number = {} vs {}".format(nums_to_select,total_number))
         v = np.zeros(len(pred_score))
         index = np.argsort(-pred_score)
-        for i in range(nums_to_select):  #排序,求最前面的n个
-            v[index[i]] = 1
+        count = 0
+        for i in range(len(pred_score)):
+            if count == total_number:
+                break
+            if round(id_num[str(pred_y[i])]):
+                v[index[i]] = 1
+                count  = count+1
         return v.astype('bool')
 
 
