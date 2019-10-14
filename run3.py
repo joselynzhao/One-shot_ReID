@@ -101,16 +101,20 @@ class gif_drawer2():
         plt.plot(self.select_num_percent, self.select_pre, c="cyan", marker ='o',label="select_pre")
         plt.pause(0.1)
 
+    def saveimage(self,picture_path):
+        plt.savefig(picture_path)
 
+import  codecs
 def main(args):
     gd = gif_drawer2()
+
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
     save_path = args.logs_dir
     total_step = math.ceil(math.pow((100 / args.EF), (1 / args.q))) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
     sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'))
-
+    data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
     num_all_examples = len(dataset_all.train)
@@ -134,10 +138,11 @@ def main(args):
     base_step = args.bs
     top_list = []  # top1
     isout = 0  #用来标记是否应该结束训练
+    # data_file = open("")
     while(not isout):
         print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
             args.mode, args.EF, args.q, step, nums_to_select, save_path))
-        eug.train(new_train_data, step, epochs=2, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         print("joselyn msg: ------------------------------------------------------traning is over")
         # evluate
@@ -155,15 +160,21 @@ def main(args):
         pred_y, pred_score,label_pre,id_num= eug.estimate_label()
         print("joselyn msg: estimate labels is over")
         # select data
-        selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data)
+        selected_idx = eug.select_top_data(pred_score, nums_to_select)
+        # selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data) #for 同比
         print("joselyn msg: select top data is over")
         # add new data
-        new_train_data,select_pre = eug.generate_new_train_data(selected_idx, pred_y)
+        new_train_data,select_pre = eug.generate_new_train_data(selected_idx,pred_y)
+        # new_train_data,select_pre = eug.generate_new_train_data(selected_idx, pred_y) #for 同比
         print("joselyn msg: generate new train data is over")
 
         gd.draw(step_size[step]/len(u_data),top1,mAP,label_pre,select_pre)
+        data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
         print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
         step = step + 1
+
+    data_file.close()
+    gd.saveimage(osp.join(args.logs_dir,'image' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S")))
 
 
 

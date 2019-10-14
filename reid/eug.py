@@ -226,8 +226,15 @@ class EUG():
         return pred_label, pred_score,label_pre,id_num
 
 
+    def select_top_data(self, pred_score, nums_to_select):
+        v = np.zeros(len(pred_score))
+        index = np.argsort(-pred_score)
+        for i in range(nums_to_select):  #排序,求最前面的n个
+            v[index[i]] = 1
+        return v.astype('bool')
 
-    def select_top_data(self, pred_score, nums_to_select,id_num,pred_y,u_data):
+
+    def select_top_data3(self, pred_score, nums_to_select,id_num,pred_y,u_data):
         total_number = 0
         for item in id_num:
             id_num[item] = round(id_num[item] * nums_to_select / len(u_data))  #向下取整/ 四舍五入
@@ -243,6 +250,7 @@ class EUG():
             if round(id_num[str(pred_y[i])]):
                 v[index[i]] = 1
                 count  = count+1
+                id_num[str(pred_y[i])] = id_num[str(pred_y[i])]-1
         return v.astype('bool')
 
 

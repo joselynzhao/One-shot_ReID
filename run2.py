@@ -136,7 +136,7 @@ def main(args):
     while(not isout):
         print("This is running {} with base_size ={}%, step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
             args.mode, args.bs, step, nums_to_select, save_path))
-        eug.train(new_train_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         print("joselyn msg: ------------------------------------------------------traning is over")
         # evluate

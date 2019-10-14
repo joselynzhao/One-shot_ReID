@@ -1,0 +1,22 @@
+step:0 top1:34.33% nums_selected:0 selected_percent:0.00% mAP:30.10% label_pre:41.16% select_pre:85.00%
+step:1 top1:34.33% nums_selected:75 selected_percent:5.02% mAP:29.66% label_pre:42.90% select_pre:97.06%
+step:2 top1:36.75% nums_selected:150 selected_percent:10.04% mAP:31.89% label_pre:43.51% select_pre:93.60%
+step:3 top1:41.45% nums_selected:225 selected_percent:15.06% mAP:35.67% label_pre:47.32% select_pre:87.95%
+step:4 top1:43.30% nums_selected:299 selected_percent:20.01% mAP:38.41% label_pre:50.47% select_pre:88.89%
+step:5 top1:51.28% nums_selected:374 selected_percent:25.03% mAP:43.55% label_pre:54.95% select_pre:91.14%
+step:6 top1:50.43% nums_selected:449 selected_percent:30.05% mAP:44.52% label_pre:55.09% select_pre:92.08%
+step:7 top1:52.56% nums_selected:523 selected_percent:35.01% mAP:45.12% label_pre:56.56% select_pre:91.86%
+step:8 top1:54.13% nums_selected:598 selected_percent:40.03% mAP:47.01% label_pre:58.43% select_pre:91.30%
+step:9 top1:58.26% nums_selected:673 selected_percent:45.05% mAP:49.86% label_pre:59.77% select_pre:86.71%
+step:10 top1:58.26% nums_selected:747 selected_percent:50.00% mAP:49.70% label_pre:61.04% select_pre:84.05%
+step:11 top1:61.82% nums_selected:822 selected_percent:55.02% mAP:51.89% label_pre:62.65% select_pre:84.95%
+step:12 top1:64.25% nums_selected:897 selected_percent:60.04% mAP:53.91% label_pre:63.99% select_pre:83.56%
+step:13 top1:64.39% nums_selected:972 selected_percent:65.06% mAP:54.32% label_pre:64.93% select_pre:82.60%
+step:14 top1:64.67% nums_selected:1046 selected_percent:70.01% mAP:55.39% label_pre:64.66% select_pre:74.32%
+step:15 top1:66.38% nums_selected:1121 selected_percent:75.03% mAP:57.07% label_pre:65.39% select_pre:74.66%
+step:16 top1:64.39% nums_selected:1196 selected_percent:80.05% mAP:54.84% label_pre:66.00% select_pre:70.22%
+step:17 top1:65.38% nums_selected:1270 selected_percent:85.01% mAP:55.91% label_pre:66.27% select_pre:67.30%
+step:18 top1:65.38% nums_selected:1345 selected_percent:90.03% mAP:56.95% label_pre:66.40% select_pre:66.44%
+step:19 top1:64.96% nums_selected:1420 selected_percent:95.05% mAP:55.36% label_pre:66.53% select_pre:66.53%
+step:20 top1:65.24% nums_selected:1494 selected_percent:100.00% mAP:56.31% label_pre:66.67% select_pre:66.67%
+
