@@ -98,7 +98,7 @@ def changetoHSM(secends):
 
 import  codecs
 def main(args):
-    gd = gif_drawer2()
+    # gd = gif_drawer2()
 
     print("game begin!")
     cudnn.benchmark = True
@@ -134,22 +134,22 @@ def main(args):
     top_list = []  # top1
     isout = 0  #用来标记是否应该结束训练
     # data_file = open("")
-    start_time = time.clock()
+    start_time = time.time()
     while(not isout):
-        onetimeS = time.clock()
+        onetimeS = time.time()
         print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
             args.mode, args.EF, args.q, step, nums_to_select, save_path))
-        onetime_trainS = time.clock()
-        eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        onetime_trainS = time.time()
+        eug.train(new_train_data, step, epochs=20, step_size=15, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
-        onetime_trainE = time.clock()
+        onetime_trainE = time.time()
         onetime_train = onetime_trainE-onetime_trainS
         h,m,s = changetoHSM(onetime_train)
         print("joselyn msg: traning is over,cost %02d:%02d:%02.6f" % (h, m, s))
         # evluate
-        onetime_evaluateS = time.clock()
+        onetime_evaluateS = time.time()
         mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
-        onetime_evaluateE = time.clock()
+        onetime_evaluateE = time.time()
         onetime_evaluate = onetime_evaluateE-onetime_evaluateS
         h, m, s = changetoHSM(onetime_evaluate)
         step_size.append(nums_to_select)
@@ -160,9 +160,9 @@ def main(args):
         # pseudo-label and confidence sc
         nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100),
                              len(u_data))  # 指数渐进策略
-        onetime_estimateS = time.clock()
+        onetime_estimateS = time.time()
         pred_y, pred_score,label_pre,id_num= eug.estimate_label()
-        onetime_estimateE = time.clock()
+        onetime_estimateE = time.time()
         onetime_estimate = onetime_estimateE-onetime_estimateS
         h, m, s = changetoHSM(onetime_estimate)
         print("joselyn msg: estimate labels is over,cost %02d:%02d:%02.6f" % (h, m, s))
@@ -175,8 +175,8 @@ def main(args):
         # new_train_data,select_pre = eug.generate_new_train_data(selected_idx, pred_y) #for 同比
         print("joselyn msg: generate new train data is over")
 
-        gd.draw(step_size[step]/len(u_data),top1,mAP,label_pre,select_pre)
-        onetimeE =time.clock()
+        # gd.draw(step_size[step]/len(u_data),top1,mAP,label_pre,select_pre)
+        onetimeE =time.time()
         onetime = onetimeE-onetimeS
         h, m, s = changetoHSM(onetime)
         data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
@@ -187,7 +187,7 @@ def main(args):
 
     data_file.close()
     time_file.close()
-    end_time = time.clock()
+    end_time = time.time()
     alltime = end_time-start_time
     h, m, s = changetoHSM(alltime)
     print("alltime cost %02d:%02d:%02.6f" % (h, m, s))
