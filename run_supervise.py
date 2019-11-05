@@ -109,7 +109,7 @@ def main(args):
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
     # num_all_examples = len(dataset_all.train)
-    l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
+    l_data, u_data = get_one_shot_in_cam2(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
         dataset_all.name))
     # num_all_examples = len(dataset_all.train)
     # l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
@@ -126,12 +126,12 @@ def main(args):
 
     isout = 0  #用来标记是否应该结束训练
     start_time = time.time()
-    for step in range(21):
+    for step in range(30):
         onetimeS = time.time()
         print("This is running {} with EF ={}%, q = {} step {}: \t Logs-dir {}".format(
             args.mode, args.EF, args.q, step+1, save_path))
         onetime_trainS = time.time()
-        eug.train(l_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(l_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         onetime_trainE = time.time()
         onetime_train = onetime_trainE-onetime_trainS
