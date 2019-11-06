@@ -100,24 +100,26 @@ import os
 import  codecs
 def main(args):
     # gd = gif_drawer2()
-
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "{}".format(args.device)
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
     save_path = args.logs_dir
-    total_step = math.ceil(math.pow((100 / args.EF), (1 / args.q))) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
-    print("total_step:{}".format(total_step))
-    sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'))
-    data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
-    time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
+
+    # total_step = math.ceil(math.pow((100 / args.EF), (1 / args.q))) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
+    # print("total_step:{}".format(total_step))
+    sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.step_s)+"_"+ str(args.yita) + '.txt'))
+    data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.step_s)+"_"+ str(args.yita)  + '.txt'),'a')
+    time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.step_s)+"_"+ str(args.yita) + '.txt'),'a')
 
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
     num_all_examples = len(dataset_all.train)
     l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
         dataset_all.name))
-
+    NN = len(l_data)+len(u_data)
+    total_step = math.ceil((2 * NN * args.step_s)/(args.yita + NN)) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
+    print("total_step:{}".format(total_step))
     resume_step, ckpt_file = -1, ''
     if args.resume:  # 重新训练的时候用
         resume_step, ckpt_file = resume(args)
@@ -139,10 +141,10 @@ def main(args):
     start_time = time.time()
     while(not isout):
         onetimeS = time.time()
-        print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
-            args.mode, args.EF, args.q, step, nums_to_select, save_path))
+        print("This is running {} with step_s ={}%, yita = {} step {}:   Nums_been_selected {},  Logs-dir {}".format(
+            args.mode, args.step_s, args.yita, step, nums_to_select, save_path))
         onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=20, step_size=15, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         onetime_trainE = time.time()
         onetime_train = onetime_trainE-onetime_trainS
@@ -160,8 +162,8 @@ def main(args):
         print("joselyn msg: evaluate is over,cost %02d:%02d:%02.6f" % (h, m, s))
 
         # pseudo-label and confidence sc
-        nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100),
-                             len(u_data))  # 指数渐进策略
+        # nums_to_select = min(math.ceil(len(u_data) * math.pow((step+1),args.q) * args.EF),len(u_data))  # 指数渐进策略
+        nums_to_select = min(math.ceil((NN-args.yita-len(l_data))*step/args.step_s+args.yita+len(l_data)),len(u_data))  # 指数渐进策略
         onetime_estimateS = time.time()
         pred_y, pred_score,label_pre,id_num= eug.estimate_label()
         onetime_estimateE = time.time()
@@ -220,6 +222,8 @@ if __name__ == '__main__':
     parser.add_argument('--q', type=float, default=1)  # 指数参数
     parser.add_argument('--k', type=float, default=15)
     parser.add_argument('--bs', type=int, default=50)
+    parser.add_argument('--yita', type=int, default=100)
+    parser.add_argument('--step_s', type=int, default=20)
     working_dir = os.path.dirname(os.path.abspath(__file__))
     parser.add_argument('--data_dir', type=str, metavar='PATH',
                         default=os.path.join(working_dir, 'data'))
@@ -229,4 +233,5 @@ if __name__ == '__main__':
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
     parser.add_argument('--max_frames', type=int, default=100)
+    parser.add_argument('--device', type=int, default=0)
     main(parser.parse_args())
