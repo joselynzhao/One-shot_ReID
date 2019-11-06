@@ -131,7 +131,7 @@ def main(args):
         print("This is running {} with EF ={}%, q = {} step {}: \t Logs-dir {}".format(
             args.mode, args.EF, args.q, step+1, save_path))
         onetime_trainS = time.time()
-        eug.train(l_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(l_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         onetime_trainE = time.time()
         onetime_train = onetime_trainE-onetime_trainS

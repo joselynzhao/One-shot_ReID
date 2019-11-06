@@ -11,4 +11,4 @@
 #python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_TIME3/ --EF 10 --q 1 --mode Dissimilarity --max_frames 400
 
 
-python3.6 run_supervise.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_supervise/ --EF 5 --q 1 --mode Dissimilarity --max_frames 400
+python3.6 run_supervise.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_supervise70/ --EF 5 --q 1 --mode Dissimilarity --max_frames 400
