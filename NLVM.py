@@ -101,7 +101,7 @@ import  codecs
 def main(args):
     # gd = gif_drawer2()
 
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
@@ -141,7 +141,7 @@ def main(args):
         print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
             args.mode, args.EF, args.q, step, nums_to_select, save_path))
         onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=20, step_size=15, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         onetime_trainE = time.time()
         onetime_train = onetime_trainE-onetime_trainS
@@ -224,4 +224,5 @@ if __name__ == '__main__':
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
     parser.add_argument('--max_frames', type=int, default=100)
+
     main(parser.parse_args())
