@@ -8,4 +8,4 @@
 # if you need to resume 
 #python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_tesla8/ --EF 10 --q 1 --mode Dissimilarity --max_frames 400  -b 1000
 
-python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_50/  --yita 300  --mode Dissimilarity --max_frames 2000 --device 3
+python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_50/  --yita 50  --mode Dissimilarity --max_frames 100

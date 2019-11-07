@@ -100,7 +100,8 @@ import os
 import  codecs
 def main(args):
     # gd = gif_drawer2()
-    os.environ["CUDA_VISIBLE_DEVICES"] = "{}".format(args.device)
+
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
@@ -118,7 +119,8 @@ def main(args):
     l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
         dataset_all.name))
     NN = len(l_data)+len(u_data)
-    total_step = math.ceil((2 * NN * args.step_s)/(args.yita + NN)) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
+    # total_step = math.ceil((2 * NN * args.step_s)/(args.yita + NN)) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
+    total_step = math.ceil((2 * NN *args.step_s+args.yita+len(u_data))/(args.yita +NN + len(l_data)))+1
     print("total_step:{}".format(total_step))
     resume_step, ckpt_file = -1, ''
     if args.resume:  # 重新训练的时候用
@@ -131,7 +133,7 @@ def main(args):
 
     nums_to_select = 0
     new_train_data = l_data
-    step = 0
+    step = 1
     # to_list = []
     step_size = []
     base_step = args.bs
@@ -144,7 +146,7 @@ def main(args):
         print("This is running {} with step_s ={}%, yita = {} step {}:   Nums_been_selected {},  Logs-dir {}".format(
             args.mode, args.step_s, args.yita, step, nums_to_select, save_path))
         onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(new_train_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         onetime_trainE = time.time()
         onetime_train = onetime_trainE-onetime_trainS
@@ -163,7 +165,8 @@ def main(args):
 
         # pseudo-label and confidence sc
         # nums_to_select = min(math.ceil(len(u_data) * math.pow((step+1),args.q) * args.EF),len(u_data))  # 指数渐进策略
-        nums_to_select = min(math.ceil((NN-args.yita-len(l_data))*step/args.step_s+args.yita+len(l_data)),len(u_data))  # 指数渐进策略
+        # nums_to_select = min(math.ceil((NN-args.yita-len(l_data))*step/args.step_s+args.yita+len(l_data)),len(u_data))  # 指数渐进策略
+        nums_to_select = min(math.ceil((len(u_data)-args.yita)*(step-1)/(total_step-1))+args.yita,len(u_data))
         onetime_estimateS = time.time()
         pred_y, pred_score,label_pre,id_num= eug.estimate_label()
         onetime_estimateE = time.time()
@@ -183,9 +186,9 @@ def main(args):
         onetimeE =time.time()
         onetime = onetimeE-onetimeS
         h, m, s = changetoHSM(onetime)
-        data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
+        data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step-1],step_size[step-1]/len(u_data),mAP,label_pre,select_pre))
         time_file.write("step:{} traning:{:.8} evaluate:{:.8} estimate:{:.8} onetime:{:.8}\n".format(int(step),onetime_train,onetime_evaluate,onetime_estimate,onetime))
-        print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
+        print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step-1],step_size[step-1]/len(u_data),mAP,label_pre,select_pre))
         print("onetime cost %02d:%02d:%02.6f" % (h, m, s))
         step = step + 1
 
@@ -197,13 +200,6 @@ def main(args):
     print("alltime cost %02d:%02d:%02.6f" % (h, m, s))
 
     # gd.saveimage(osp.join(args.logs_dir,'image' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S")))
-
-
-
-
-
-
-
 
 
 
