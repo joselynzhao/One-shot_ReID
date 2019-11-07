@@ -298,6 +298,7 @@ class EUG():
             mask = masks[i] == 1
             # print(score.std(),score[mask].std())
             if sum(mask) > 1:
+                print(sum(mask))
                 stds[i] = score[mask].std()
         # 根据方差排序
         idxs = np.argsort(-stds)
