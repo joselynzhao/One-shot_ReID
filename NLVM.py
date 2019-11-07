@@ -168,7 +168,12 @@ def main(args):
         h, m, s = changetoHSM(onetime_estimate)
         print("joselyn msg: estimate labels is over,cost %02d:%02d:%02.6f" % (h, m, s))
         # select data
-        selected_idx = eug.select_top_data(pred_score, nums_to_select)
+        # selected_idx = eug.select_top_data(pred_score, nums_to_select)
+
+        # NLVM
+        selected_idx = eug.select_top_data_NLVM(pred_score, nums_to_select)
+
+
         # selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data) #for 同比
         print("joselyn msg: select top data is over")
         # add new data
