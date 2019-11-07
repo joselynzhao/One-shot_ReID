@@ -283,6 +283,7 @@ class EUG():
         return v.astype('bool')
 
     def select_top_data_NLVM(self, pred_score, nums_to_select, percent_P = 0.1, percent_N = 0.1):
+        # pred_score = pred_score.T # if necessary
         N_u,N_l = pred_score.shape
         diam = pred_score.max()
         # 标记距离
@@ -298,6 +299,25 @@ class EUG():
             # print(score.std(),score[mask].std())
             if sum(mask) > 1:
                 stds[i] = score[mask].std()
+        # 根据方差排序
+        idxs = np.argsort(-stds)
+        # print(stds[idxs[:nums_to_select]])
+        selection[idxs[:nums_to_select]] = True
+        return selection
+
+    def select_top_data_NLVM_2(self, pred_score, nums_to_select, percent_P = 0.1, percent_N = 0.1):
+        # pred_score = pred_score.T # if necessary
+        # 方案2, 求最近的P%样本的方差
+        N_u,N_l = pred_score.shape
+        stds = np.zeros(N_u)
+        selection = np.zeros(N_u,'bool')
+        # 求最近的P%样本的方差
+        for i in range(N_u):
+            score = pred_score[i]
+            # 求k近邻
+            topk = int(N_l * percent_P)
+            topk_idxs = np.argpartition(score,topk)[:topk]
+            stds[i] = score[topk_idxs].std()
         # 根据方差排序
         idxs = np.argsort(-stds)
         # print(stds[idxs[:nums_to_select]])
