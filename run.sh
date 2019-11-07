@@ -6,6 +6,9 @@
 #python3.6 run.py --dataset mars --logs_dir logs/mars_EF_10/ --EF 10 --mode Dissimilarity --max_frames 100
 
 # if you need to resume 
-#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_tesla8/ --EF 10 --q 1 --mode Dissimilarity --max_frames 400  -b 1000
+#python3.6 run3.py --dataset mars --logs_dir logs/mars_EF_10_q_1_pro/ --EF 10 --q 1 --mode Dissimilarity --max_frames 100
 
-python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_50/  --yita 300  --mode Dissimilarity --max_frames 2000 --device 3
+#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_50/  --yita 50  --mode Dissimilarity --max_frames 900 --device 0
+python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_100/  --yita 100  --mode Dissimilarity --max_frames 900 --device 1
+#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_200/  --yita 200  --mode Dissimilarity --max_frames 900 --device 2
+#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_300/  --yita 300  --mode Dissimilarity --max_frames 900 --device 3
