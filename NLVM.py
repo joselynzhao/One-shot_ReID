@@ -1,3 +1,4 @@
+
 from __future__ import print_function, absolute_import
 from reid.eug import *
 from reid import datasets
@@ -173,7 +174,7 @@ def main(args):
         # # NLVM
         # print("下面是pred_score.shape")
         # print(pred_score.shape)
-        # selected_idx = eug.select_top_data_NLVM(pred_score, nums_to_select)
+        selected_idx = eug.select_top_data_NLVM(pred_score, nums_to_select)
 
 
         # selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data) #for 同比
