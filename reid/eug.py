@@ -161,7 +161,6 @@ class EUG():
         return pred_label, pred_score
 
 
-
     def get_Dissimilarity_result(self):
 
         # extract feature 
@@ -257,6 +256,122 @@ class EUG():
         # print(id_num)
         return labels, scores,num_correct_pred/u_feas.shape[0],id_num
 
+    def get_Dissimilarity_result_NLVM(self):
+        # extract feature 
+        u_feas = self.get_feature(self.u_data)
+        l_feas = self.get_feature(self.l_data)
+        print("u_features", u_feas.shape, "l_features", l_feas.shape)
+
+        # scores = np.zeros((u_feas.shape[0]))
+        labels = np.zeros((u_feas.shape[0]))
+        # 分别用来存 _ufeas的分数和标签
+
+        id_num = {}  #以标签名称作为字典
+        # a = 1
+        num_correct_pred = 0
+        dists = []
+        for idx, u_fea in enumerate(u_feas):
+            diffs = l_feas - u_fea
+            dist = np.linalg.norm(diffs,axis=1)
+            index_min = np.argmin(dist)
+            # scores[idx] = - dist[index_min]  # "- dist" : more dist means less score
+            dists.append(dist)
+
+            labels[idx] = self.l_label[index_min] # take the nearest labled neighbor as the prediction label
+            # if a:
+            #     print("labels :-------------------------------------------", labels[idx])
+            #     a = 0
+            #     输出的结果是0.0
+            # count the correct number of Nearest Neighbor prediction
+            if self.u_label[idx] == labels[idx]:
+                num_correct_pred +=1
+            # 统计各个id的数量
+            if str(labels[idx]) in id_num.keys():
+                id_num[str(labels[idx])]=id_num[str(labels[idx])]+1 #值加1
+            else:
+                id_num[str(labels[idx])] =1
+        # ------------------------以下是临近点方差----------------------------
+        percent_P = 0.1
+        percent_N = 0.1
+        dists = np.vstack(dists)
+        N_u,N_l = u_feas.shape[0],l_feas.shape[0]
+        diam = dists.max() # 直径
+        # 标记距离
+        masks = np.zeros_like(dists, dtype='int32')
+        masks[dists < diam * percent_P] = 1
+        masks[dists > diam * (1-percent_N)] = -1
+        stds = np.zeros(N_u)
+        # 计算P样本方差
+        for i in range(N_u):
+            dist = dists[i]
+            mask = masks[i] == 1
+            # print(score.std(),score[mask].std())
+            if sum(mask) > 1:
+                # print(sum(mask))
+                stds[i] = dist[mask].std()
+        # ---------------------------方差计算结束，方差即为得分------------------
+
+        print("{} predictions on all the unlabeled data: {} of {} is correct, accuracy = {:0.3f}".format(
+            self.mode, num_correct_pred, u_feas.shape[0], num_correct_pred/u_feas.shape[0]))
+
+        sorted(id_num.items(),key = lambda item:item[1])
+        # print("id_num:--------------------------------------------id_num----------------- ")
+        # print(id_num)
+        # return labels, scores,num_correct_pred/u_feas.shape[0],id_num
+        return labels, stds,num_correct_pred/u_feas.shape[0],id_num
+
+    def get_Dissimilarity_result_NLVM_2(self):
+        # 方案2
+        # extract feature 
+        u_feas = self.get_feature(self.u_data)
+        l_feas = self.get_feature(self.l_data)
+        print("u_features", u_feas.shape, "l_features", l_feas.shape)
+
+        # scores = np.zeros((u_feas.shape[0]))
+        stds = np.zeros((u_feas.shape[0]))
+        labels = np.zeros((u_feas.shape[0]))
+        # 分别用来存 _ufeas的分数和标签
+
+        id_num = {}  #以标签名称作为字典
+        # a = 1
+        num_correct_pred = 0
+
+        percent_P = 0.1
+        percent_N = 0.1
+        N_u,N_l = u_feas.shape[0],l_feas.shape[0]
+        topk = int(N_l * percent_P)
+
+        for idx, u_fea in enumerate(u_feas):
+            diffs = l_feas - u_fea
+            dist = np.linalg.norm(diffs,axis=1)
+            index_min = np.argmin(dist)
+            # scores[idx] = - dist[index_min]  # "- dist" : more dist means less score
+            topk_idxs = np.argpartition(dist,topk)[:topk]
+            stds[idx] = dist[topk_idxs].std()
+
+            labels[idx] = self.l_label[index_min] # take the nearest labled neighbor as the prediction label
+            # if a:
+            #     print("labels :-------------------------------------------", labels[idx])
+            #     a = 0
+            #     输出的结果是0.0
+            # count the correct number of Nearest Neighbor prediction
+            if self.u_label[idx] == labels[idx]:
+                num_correct_pred +=1
+            # 统计各个id的数量
+            if str(labels[idx]) in id_num.keys():
+                id_num[str(labels[idx])]=id_num[str(labels[idx])]+1 #值加1
+            else:
+                id_num[str(labels[idx])] =1
+
+        print("{} predictions on all the unlabeled data: {} of {} is correct, accuracy = {:0.3f}".format(
+            self.mode, num_correct_pred, u_feas.shape[0], num_correct_pred/u_feas.shape[0]))
+
+        sorted(id_num.items(),key = lambda item:item[1])
+        # print("id_num:--------------------------------------------id_num----------------- ")
+        # print(id_num)
+        # return labels, scores,num_correct_pred/u_feas.shape[0],id_num
+        return labels, stds,num_correct_pred/u_feas.shape[0],id_num
+
 
     def estimate_label(self):
 
@@ -264,7 +379,7 @@ class EUG():
 
         if self.mode == "Dissimilarity": 
             # predict label by dissimilarity cost
-            [pred_label, pred_score,label_pre,id_num] = self.get_Dissimilarity_result2()
+            [pred_label, pred_score,label_pre,id_num] = self.get_Dissimilarity_result_NLVM()
 
         elif self.mode == "Classification": 
             # predict label by classification
@@ -282,48 +397,6 @@ class EUG():
             v[index[i]] = 1
         return v.astype('bool')
 
-    def select_top_data_NLVM(self, pred_score, nums_to_select, percent_P = 0.2, percent_N = 0.1):
-        # pred_score = pred_score.T # if necessary
-        N_u,N_l = pred_score.shape
-        diam = pred_score.max()
-        # 标记距离
-        masks = np.zeros_like(pred_score, dtype='int32')
-        masks[pred_score < diam * percent_P] = 1
-        masks[pred_score > diam * (1-percent_N)] = -1
-        stds = np.zeros(N_u)
-        selection = np.zeros(N_u,'bool')
-        # 计算P样本方差
-        for i in range(N_u):
-            score = pred_score[i]
-            mask = masks[i] == 1
-            # print(score.std(),score[mask].std())
-            if sum(mask) > 1:
-                print(sum(mask))
-                stds[i] = score[mask].std()
-        # 根据方差排序
-        idxs = np.argsort(-stds)
-        # print(stds[idxs[:nums_to_select]])
-        selection[idxs[:nums_to_select]] = True
-        return selection
-
-    def select_top_data_NLVM_2(self, pred_score, nums_to_select, percent_P = 0.1, percent_N = 0.1):
-        # pred_score = pred_score.T # if necessary
-        # 方案2, 求最近的P%样本的方差
-        N_u,N_l = pred_score.shape
-        stds = np.zeros(N_u)
-        selection = np.zeros(N_u,'bool')
-        # 求最近的P%样本的方差
-        for i in range(N_u):
-            score = pred_score[i]
-            # 求k近邻
-            topk = int(N_l * percent_P)
-            topk_idxs = np.argpartition(score,topk)[:topk]
-            stds[i] = score[topk_idxs].std()
-        # 根据方差排序
-        idxs = np.argsort(-stds)
-        # print(stds[idxs[:nums_to_select]])
-        selection[idxs[:nums_to_select]] = True
-        return selection
 
     def select_top_data3(self, pred_score, nums_to_select,id_num,pred_y,u_data):
         total_number = 0
