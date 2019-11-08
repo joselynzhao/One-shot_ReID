@@ -291,7 +291,7 @@ class EUG():
             else:
                 id_num[str(labels[idx])] =1
         # ------------------------以下是临近点方差----------------------------
-        percent_P = 0.1
+        percent_P = 0.3
         percent_N = 0.1
         dists = np.vstack(dists)
         N_u,N_l = u_feas.shape[0],l_feas.shape[0]
@@ -302,12 +302,13 @@ class EUG():
         masks[dists > diam * (1-percent_N)] = -1
         stds = np.zeros(N_u)
         # 计算P样本方差
+        print('std....',dists.shape,diam,dists.min(),dists.mean())
         for i in range(N_u):
             dist = dists[i]
             mask = masks[i] == 1
             # print(score.std(),score[mask].std())
             if sum(mask) > 1:
-                # print(sum(mask))
+                print(sum(mask))
                 stds[i] = dist[mask].std()
         # ---------------------------方差计算结束，方差即为得分------------------
 
