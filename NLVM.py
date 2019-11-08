@@ -101,7 +101,7 @@ import  codecs
 def main(args):
     # gd = gif_drawer2()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "5"
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
@@ -141,7 +141,7 @@ def main(args):
         print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
             args.mode, args.EF, args.q, step, nums_to_select, save_path))
         onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=20, step_size=15, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(new_train_data, step, epochs=0, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         onetime_trainE = time.time()
         onetime_train = onetime_trainE-onetime_trainS
@@ -149,7 +149,7 @@ def main(args):
         print("joselyn msg: traning is over,cost %02d:%02d:%02.6f" % (h, m, s))
         # evluate
         onetime_evaluateS = time.time()
-        mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
+        # mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
         onetime_evaluateE = time.time()
         onetime_evaluate = onetime_evaluateE-onetime_evaluateS
         h, m, s = changetoHSM(onetime_evaluate)
@@ -171,6 +171,8 @@ def main(args):
         # selected_idx = eug.select_top_data(pred_score, nums_to_select)
 
         # NLVM
+        print("下面是pred_score.shape")
+        print(pred_score.shape)
         selected_idx = eug.select_top_data_NLVM(pred_score, nums_to_select)
 
 
@@ -185,9 +187,9 @@ def main(args):
         onetimeE =time.time()
         onetime = onetimeE-onetimeS
         h, m, s = changetoHSM(onetime)
-        data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
+        # data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
         time_file.write("step:{} traning:{:.8} evaluate:{:.8} estimate:{:.8} onetime:{:.8}\n".format(int(step),onetime_train,onetime_evaluate,onetime_estimate,onetime))
-        print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
+        # print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
         print("onetime cost %02d:%02d:%02.6f" % (h, m, s))
         step = step + 1
 
@@ -224,4 +226,5 @@ if __name__ == '__main__':
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
     parser.add_argument('--max_frames', type=int, default=100)
+
     main(parser.parse_args())

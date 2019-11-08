@@ -282,7 +282,7 @@ class EUG():
             v[index[i]] = 1
         return v.astype('bool')
 
-    def select_top_data_NLVM(self, pred_score, nums_to_select, percent_P = 0.1, percent_N = 0.1):
+    def select_top_data_NLVM(self, pred_score, nums_to_select, percent_P = 0.2, percent_N = 0.1):
         # pred_score = pred_score.T # if necessary
         N_u,N_l = pred_score.shape
         diam = pred_score.max()
@@ -298,6 +298,7 @@ class EUG():
             mask = masks[i] == 1
             # print(score.std(),score[mask].std())
             if sum(mask) > 1:
+                print(sum(mask))
                 stds[i] = score[mask].std()
         # 根据方差排序
         idxs = np.argsort(-stds)
