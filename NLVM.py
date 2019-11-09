@@ -163,7 +163,7 @@ def main(args):
         nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100),
                              len(u_data))  # 指数渐进策略
         onetime_estimateS = time.time()
-        pred_y, pred_score,label_pre,id_num= eug.estimate_label()
+        pred_y, pred_score,label_pre,id_num= eug.estimate_label(args.percent_P,args.percent_N)
         onetime_estimateE = time.time()
         onetime_estimate = onetime_estimateE-onetime_estimateS
         h, m, s = changetoHSM(onetime_estimate)
@@ -174,7 +174,7 @@ def main(args):
         # # NLVM
         # print("下面是pred_score.shape")
         # print(pred_score.shape)
-        selected_idx = eug.select_top_data_NLVM(pred_score, nums_to_select)
+        # selected_idx = eug.select_top_data_NLVM(pred_score, nums_to_select)
 
 
         # selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data) #for 同比
@@ -227,5 +227,6 @@ if __name__ == '__main__':
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
     parser.add_argument('--max_frames', type=int, default=100)
-
+    parser.add_argument('--percent_P', type=float, default=0.3)
+    parser.add_argument('--percent_N', type=float, default=0.3)
     main(parser.parse_args())
