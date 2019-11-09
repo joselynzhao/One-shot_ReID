@@ -12,4 +12,4 @@
 #python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_100/  --yita 100  --mode Dissimilarity --max_frames 900 --device 1
 #python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_200/  --yita 200  --mode Dissimilarity --max_frames 900 --device 2
 #python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_300/  --yita 300  --mode Dissimilarity --max_frames 900 --device 3
-python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_0/  --yita 0  --mode Dissimilarity --max_frames 900 --device 4  #验证作者的方法
+python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_1/  --yita 1  --mode Dissimilarity --max_frames 900 --device 4  #验证作者的方法
