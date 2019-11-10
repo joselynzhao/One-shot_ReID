@@ -9,4 +9,7 @@
 # if you need to resume 
 #python3.6 run3.py --dataset mars --logs_dir logs/mars_EF_10_q_1_pro/ --EF 10 --q 1 --mode Dissimilarity --max_frames 100
 
-python3.6 NLVM.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_NLVM_2/ --EF 5 --q 1 --mode Dissimilarity --max_frames 900  --percent_P 1.0
+
+
+
+python3.6 run_supervise2.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_supervise20_step2/ --EF 5 --q 1 --mode Dissimilarity --max_frames 400
