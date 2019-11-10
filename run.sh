@@ -12,4 +12,4 @@
 
 
 
-python3.6 run_supervise2.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_supervise20_step2/ --EF 5 --q 1 --mode Dissimilarity --max_frames 400
+python3.6 run_supervise.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_supervise20_step1/ --EF 5 --q 1 --mode Dissimilarity --max_frames 400

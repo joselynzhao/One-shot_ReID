@@ -151,6 +151,7 @@ def main(args):
 
 
         new_train_data = eug.generate_new_train_data1(nums_to_select)
+        step = step +1
 
 
     data_file.close()
