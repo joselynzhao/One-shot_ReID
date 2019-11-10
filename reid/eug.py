@@ -292,8 +292,7 @@ class EUG():
                 id_num[str(labels[idx])] =1
         # ------------------------以下是临近点方差----------------------------
 
-        np.savetxt(r'dists.txt',
-                   dists, fmt='%d', delimiter=',')
+        np.save('dists',dists)
         dists = np.vstack(dists)
         N_u,N_l = u_feas.shape[0],l_feas.shape[0]
         diam = dists.max() # 直径
@@ -301,6 +300,7 @@ class EUG():
         masks = np.zeros_like(dists, dtype='int32')
         masks[dists <= diam * percent_P] = 1
         masks[dists > diam * (1-percent_N)] = -1
+        np.save('masks',masks)
         stds = np.zeros(N_u)
         # 计算P样本方差
         print('std....',dists.shape,diam,dists.min(),dists.mean())
