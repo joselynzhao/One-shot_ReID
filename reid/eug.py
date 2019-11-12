@@ -125,7 +125,8 @@ class EUG():
         trainer = Trainer(model, criterion)
         for epoch in range(epochs):
             adjust_lr(epoch, step_size)
-            trainer.train(epoch, dataloader, optimizer, print_freq=len(dataloader)//30 * 10)
+            trainer.train(epoch, dataloader, optimizer)
+            # trainer.train(epoch, dataloader, optimizer, print_freq=len(dataloader)//30 * 10)
 
         torch.save(model.state_dict(), osp.join(self.save_path,  "{}_step_{}.ckpt".format(self.mode, step)))
         self.model = model

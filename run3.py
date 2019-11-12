@@ -110,7 +110,7 @@ def main(args):
     # print("total_step:{}".format(total_step))
     sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.step_s)+"_"+ str(args.yita) + '.txt'))
     data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.step_s)+"_"+ str(args.yita)  + '.txt'),'a')
-    time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.step_s)+"_"+ str(args.yita) + '.txt'),'a')
+    # time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.step_s)+"_"+ str(args.yita) + '.txt'),'a')
 
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
@@ -141,22 +141,22 @@ def main(args):
     # data_file = open("")
     start_time = time.time()
     while(not isout):
-        onetimeS = time.time()
+        # onetimeS = time.time()
         print("This is running {} with step_s ={}%, yita = {} step {}:   Nums_been_selected {},  Logs-dir {}".format(
             args.mode, args.step_s, args.yita, step, nums_to_select, save_path))
-        onetime_trainS = time.time()
+        # onetime_trainS = time.time()
         eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
-        onetime_trainE = time.time()
-        onetime_train = onetime_trainE-onetime_trainS
-        h,m,s = changetoHSM(onetime_train)
-        print("joselyn msg: traning is over,cost %02d:%02d:%02.6f" % (h, m, s))
+        # onetime_trainE = time.time()
+        # onetime_train = onetime_trainE-onetime_trainS
+        # h,m,s = changetoHSM(onetime_train)
+        # print("joselyn msg: traning is over,cost %02d:%02d:%02.6f" % (h, m, s))
         # evluate
-        onetime_evaluateS = time.time()
+        # onetime_evaluateS = time.time()
         mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
-        onetime_evaluateE = time.time()
-        onetime_evaluate = onetime_evaluateE-onetime_evaluateS
-        h, m, s = changetoHSM(onetime_evaluate)
+        # onetime_evaluateE = time.time()
+        # onetime_evaluate = onetime_evaluateE-onetime_evaluateS
+        # h, m, s = changetoHSM(onetime_evaluate)
         step_size.append(nums_to_select)
         if nums_to_select==len(u_data):
             isout=1
@@ -166,12 +166,12 @@ def main(args):
         # nums_to_select = min(math.ceil(len(u_data) * math.pow((step+1),args.q) * args.EF),len(u_data))  # 指数渐进策略
         # nums_to_select = min(math.ceil((NN-args.yita-len(l_data))*step/args.step_s+args.yita+len(l_data)),len(u_data))  # 指数渐进策略
         nums_to_select = min(math.ceil((len(u_data)-args.yita)*(step-1)/(total_step-1))+args.yita,len(u_data))  # 指数渐进策略
-        onetime_estimateS = time.time()
+        # onetime_estimateS = time.time()
         pred_y, pred_score,label_pre,id_num= eug.estimate_label()
-        onetime_estimateE = time.time()
-        onetime_estimate = onetime_estimateE-onetime_estimateS
-        h, m, s = changetoHSM(onetime_estimate)
-        print("joselyn msg: estimate labels is over,cost %02d:%02d:%02.6f" % (h, m, s))
+        # onetime_estimateE = time.time()
+        # onetime_estimate = onetime_estimateE-onetime_estimateS
+        # h, m, s = changetoHSM(onetime_estimate)
+        # print("joselyn msg: estimate labels is over,cost %02d:%02d:%02.6f" % (h, m, s))
         # select data
         selected_idx = eug.select_top_data(pred_score, nums_to_select)
         # selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data) #for 同比
@@ -182,21 +182,21 @@ def main(args):
         print("joselyn msg: generate new train data is over")
 
         # gd.draw(step_size[step]/len(u_data),top1,mAP,label_pre,select_pre)
-        onetimeE =time.time()
-        onetime = onetimeE-onetimeS
-        h, m, s = changetoHSM(onetime)
+        # onetimeE =time.time()
+        # onetime = onetimeE-onetimeS
+        # h, m, s = changetoHSM(onetime)
         data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step-1],step_size[step-1]/len(u_data),mAP,label_pre,select_pre))
-        time_file.write("step:{} traning:{:.8} evaluate:{:.8} estimate:{:.8} onetime:{:.8}\n".format(int(step),onetime_train,onetime_evaluate,onetime_estimate,onetime))
+        # time_file.write("step:{} traning:{:.8} evaluate:{:.8} estimate:{:.8} onetime:{:.8}\n".format(int(step),onetime_train,onetime_evaluate,onetime_estimate,onetime))
         print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step-1],step_size[step-1]/len(u_data),mAP,label_pre,select_pre))
-        print("onetime cost %02d:%02d:%02.6f" % (h, m, s))
+        # print("onetime cost %02d:%02d:%02.6f" % (h, m, s))
         step = step + 1
 
     data_file.close()
-    time_file.close()
-    end_time = time.time()
-    alltime = end_time-start_time
-    h, m, s = changetoHSM(alltime)
-    print("alltime cost %02d:%02d:%02.6f" % (h, m, s))
+    # time_file.close()
+    # end_time = time.time()
+    # alltime = end_time-start_time
+    # h, m, s = changetoHSM(alltime)
+    # print("alltime cost %02d:%02d:%02.6f" % (h, m, s))
 
     # gd.saveimage(osp.join(args.logs_dir,'image' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S")))
 
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     parser.add_argument('--k', type=float, default=15)
     parser.add_argument('--bs', type=int, default=50)
     parser.add_argument('--yita', type=int, default=100)
-    parser.add_argument('--step_s', type=int, default=20)
+    parser.add_argument('--step_s', type=int, default=10)
     working_dir = os.path.dirname(os.path.abspath(__file__))
     parser.add_argument('--data_dir', type=str, metavar='PATH',
                         default=os.path.join(working_dir, 'data'))
