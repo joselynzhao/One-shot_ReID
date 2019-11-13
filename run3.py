@@ -160,7 +160,7 @@ def main(args):
         step_size.append(nums_to_select)
         if nums_to_select==len(u_data):
             isout=1
-        print("joselyn msg: evaluate is over,cost %02d:%02d:%02.6f" % (h, m, s))
+        # print("joselyn msg: evaluate is over,cost %02d:%02d:%02.6f" % (h, m, s))
 
         # pseudo-label and confidence sc
         # nums_to_select = min(math.ceil(len(u_data) * math.pow((step+1),args.q) * args.EF),len(u_data))  # 指数渐进策略
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Exploit the Unknown Gradually')
     parser.add_argument('-d', '--dataset', type=str, default='mars',
                         choices=datasets.names())
-    parser.add_argument('-b', '--batch-size', type=int, default=16)
+    parser.add_argument('-b', '--batch-size', type=int, default=96)
     parser.add_argument('-a', '--arch', type=str, default='avg_pool',
                         choices=models.names())
     parser.add_argument('-i', '--iter-step', type=int, default=5)

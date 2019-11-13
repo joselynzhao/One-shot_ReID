@@ -174,7 +174,7 @@ def main(args):
         # print("joselyn msg: evaluate is over,cost %02d:%02d:%02.6f" % (h, m, s))
 
         # pseudo-label and confidence sc
-        nums_to_select = min(math.ceil(len(u_data) * math.pow((step+1),args.q) * args.EF),len(u_data))  # 指数渐进策略
+        nums_to_select = min(math.ceil(len(u_data) * math.pow((step+1),args.q) * args.EF/100),len(u_data))  # 指数渐进策略
         # nums_to_select = min(math.ceil((NN-args.yita-len(l_data))*step/args.step_s+args.yita+len(l_data)),len(u_data))  # 指数渐进策略
         # nums_to_select = min(math.ceil((len(u_data)-args.yita)*(step-1)/(total_step-1))+args.yita,len(u_data))  # 指数渐进策略
         # onetime_estimateS = time.time()
