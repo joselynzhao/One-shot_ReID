@@ -138,7 +138,12 @@ class EUG():
         features = np.array([logit.numpy() for logit in features.values()])
         return features
 
-
+    def get_feature_with_labels(self, dataset):
+        dataloader = self.get_dataloader(dataset, training=False)
+        features,labels = extract_features(self.model, dataloader)
+        features = np.array([logit.numpy() for logit in features.values()])
+        labels = np.array([logit.numpy() for logit in labels.values()])
+        return features,labels
 
     def resume(self, ckpt_file, step):
         print("continued from step", step)
