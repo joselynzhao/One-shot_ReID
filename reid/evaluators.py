@@ -24,14 +24,16 @@ def extract_features(model, data_loader, print_freq=1, metric=None):
 
         features = OrderedDict()
         labels = OrderedDict()
+        cams = OrderedDict()
 
         with tqdm.tqdm(total=len(data_loader)) as pbar:
-            for i, (imgs, fnames, pids, _, _) in enumerate(data_loader):
+            for i, (imgs, fnames, pids, camid, _) in enumerate(data_loader):
                 outputs = extract_cnn_feature(model, imgs)
                 # del imgs
-                for fname, output, pid in zip(fnames, outputs, pids):
+                for fname, output, pid,cam in zip(fnames, outputs, pids,camid):
                     features[fname] = output
                     labels[fname] = pid
+                    cams[fname] = cam
 
                 del imgs,outputs
                 gc.collect()
@@ -40,7 +42,7 @@ def extract_features(model, data_loader, print_freq=1, metric=None):
 
         print("Extract {} batch videos".format(len(data_loader)))
         cudnn.benchmark = True
-        return features, labels
+        return features, labels,cams
 
 
 def pairwise_distance(features, query=None, gallery=None, metric=None):

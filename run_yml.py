@@ -125,11 +125,13 @@ def main(args):
 
     eug.resume('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50.ckpt', 50)
     print('Extracting features...')
-    fts,lbs = eug.get_feature_with_labels(l_data)
+    fts,lbs,cams = eug.get_feature_with_labels_cams(l_data)
     print('Saving fts...')
     np.save('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50_fts.npy',fts)
     print('Saving lbs...')
     np.save('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50_lbs.npy',lbs)
+    print('Saving cams...')
+    np.save('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50_cams.npy',cams)
     print('Done.')
 
 
