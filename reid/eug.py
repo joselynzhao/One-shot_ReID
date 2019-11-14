@@ -260,6 +260,8 @@ class EUG():
         # extract feature 
         u_feas = self.get_feature(self.u_data)
         l_feas = self.get_feature(self.l_data)
+        np.save('u_feas',u_feas )
+        np.save('l_feas',l_feas )
         print("u_features", u_feas.shape, "l_features", l_feas.shape)
 
         # scores = np.zeros((u_feas.shape[0]))
