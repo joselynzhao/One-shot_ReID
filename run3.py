@@ -100,7 +100,7 @@ import os
 import  codecs
 def main(args):
     # gd = gif_drawer2()
-    os.environ["CUDA_VISIBLE_DEVICES"] = "{}".format(args.device)
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "{}".format(args.device)
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
