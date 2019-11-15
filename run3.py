@@ -100,7 +100,7 @@ import os
 import  codecs
 def main(args):
     # gd = gif_drawer2()
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "{}".format(args.device)
+    os.environ["CUDA_VISIBLE_DEVICES"] = "{}".format(args.device)
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
@@ -199,16 +199,6 @@ def main(args):
     # print("alltime cost %02d:%02d:%02.6f" % (h, m, s))
 
     # gd.saveimage(osp.join(args.logs_dir,'image' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S")))
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Exploit the Unknown Gradually')

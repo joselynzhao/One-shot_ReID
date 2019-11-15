@@ -92,9 +92,8 @@ class EUG():
 
         """ create model and dataloader """
         model = models.create(self.model_name, dropout=self.dropout, num_classes=self.num_classes, mode=self.mode)
-        # model = nn.DataParallel(model).cuda()
-        if torch.cuda.device_count() > 1:
-            model = nn.DataParallel(model, device_ids=[0, 1, 2]).cuda()
+        model = nn.DataParallel(model).cuda()
+        # model = nn.DataParallel(model, device_ids=[3,4]).cuda()
         # model.to(device)
         dataloader = self.get_dataloader(train_data, training=True)
 
