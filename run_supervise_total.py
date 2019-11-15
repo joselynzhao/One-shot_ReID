@@ -100,20 +100,18 @@ def main(args):
     cudnn.benchmark = True
     cudnn.enabled = True
     save_path = args.logs_dir
-    total_step = math.ceil(math.pow((100 / args.EF), (1 / args.q))) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
-    print("total_step:{}".format(total_step))
-    sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'))
-    data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
+    # total_step = math.ceil(math.pow((100 / args.EF), (1 / args.q))) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
+    print("total_step:{}".format(args.total_step))
+    sys.stdout = Logger(osp.join(args.logs_dir, 'log'  +"_totalstep"+str(args.total_step) + '.txt'))
+    data_file =codecs.open(osp.join(args.logs_dir,'data'  +"_totalstep"+str(args.total_step) + '.txt'),'a')
     # time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
 
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
-    # num_all_examples = len(dataset_all.train)
-    # l_data, u_data = get_one_shot_in_cam2(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
-    #     dataset_all.name))
-    # num_all_examples = len(dataset_all.train)
-    l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
+
+    l_data, u_data = get_one_shot_in_cam2(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
         dataset_all.name))
+    # L_data就是所有代表著的数据
     resume_step, ckpt_file = -1, ''
     if args.resume:  # 重新训练的时候用
         resume_step, ckpt_file = resume(args)
@@ -123,45 +121,21 @@ def main(args):
               data_dir=dataset_all.images_dir, l_data=l_data, u_data=u_data, save_path=args.logs_dir,
               max_frames=args.max_frames)
 
-    nums_to_select = 0
-    new_train_data = l_data
-    step = 0
-    step_size = []
-    isout = 0  # 用来标记是否应该结束训练
-    while(not isout):
+    for step in range(args.total_step): # 固定循环这么多轮
         # onetimeS = time.time()
-        print("This is running {} with EF ={}%, q = {} step {}: \t Logs-dir {}".format(
-            args.mode, args.EF, args.q, step+1, save_path))
+        print("This is running {}  step {}: \t Logs-dir {}".format(
+            args.mode, step+1, save_path))
         # onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(l_data, step, epochs=70, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
 
         mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
-        step_size.append(nums_to_select)
 
-        data_file.write("step:{} nums_to_select:{} top1:{:.2%} mAP:{:.2%} \n".format(int(step), nums_to_select, top1, mAP))
-        print("step:{} nums_to_select:{} top1:{:.2%}  mAP:{:.2%}".format(int(step),nums_to_select, top1, mAP))
-
-
-        if nums_to_select == len(u_data):
-            isout = 1
-        nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100), len(u_data))  # 指数渐进策略
-
-        # selected_idx = eug.select_top_data(nums_to_select)
-
-
-        new_train_data = eug.generate_new_train_data1(nums_to_select)
-        step = step +1
+        data_file.write("step:{} top1:{:.2%} mAP:{:.2%} \n".format(int(step), top1, mAP))
+        print("step:{} top1:{:.2%}  mAP:{:.2%}".format(int(step), top1, mAP))
 
 
     data_file.close()
-
-
-
-
-
-
-
 
 
 
@@ -190,4 +164,5 @@ if __name__ == '__main__':
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
     parser.add_argument('--max_frames', type=int, default=100)
+    parser.add_argument('--total_step', type=int, default=100)
     main(parser.parse_args())
