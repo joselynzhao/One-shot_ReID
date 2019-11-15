@@ -92,7 +92,9 @@ class EUG():
 
         """ create model and dataloader """
         model = models.create(self.model_name, dropout=self.dropout, num_classes=self.num_classes, mode=self.mode)
-        model = nn.DataParallel(model).cuda()    #这个是做什么的?
+        model = nn.DataParallel(model).cuda()
+        # model = nn.DataParallel(model, device_ids=[3,4]).cuda()
+        # model.to(device)
         dataloader = self.get_dataloader(train_data, training=True)
 
         # the base parameters for the backbone (e.g. ResNet50)
@@ -125,7 +127,8 @@ class EUG():
         trainer = Trainer(model, criterion)
         for epoch in range(epochs):
             adjust_lr(epoch, step_size)
-            trainer.train(epoch, dataloader, optimizer, print_freq=len(dataloader)//30 * 10)
+            trainer.train(epoch, dataloader, optimizer)
+            # trainer.train(epoch, dataloader, optimizer, print_freq=len(dataloader)//30 * 10)
 
         torch.save(model.state_dict(), osp.join(self.save_path,  "{}_step_{}.ckpt".format(self.mode, step)))
         self.model = model
@@ -282,6 +285,47 @@ class EUG():
             v[index[i]] = 1
         return v.astype('bool')
 
+    def select_top_data_NLVM(self, pred_score, nums_to_select, percent_P = 0.1, percent_N = 0.1):
+        # pred_score = pred_score.T # if necessary
+        N_u,N_l = pred_score.shape
+        diam = pred_score.max()
+        # 标记距离
+        masks = np.zeros_like(pred_score, dtype='int32')
+        masks[pred_score < diam * percent_P] = 1
+        masks[pred_score > diam * (1-percent_N)] = -1
+        stds = np.zeros(N_u)
+        selection = np.zeros(N_u,'bool')
+        # 计算P样本方差
+        for i in range(N_u):
+            score = pred_score[i]
+            mask = masks[i] == 1
+            # print(score.std(),score[mask].std())
+            if sum(mask) > 1:
+                stds[i] = score[mask].std()
+        # 根据方差排序
+        idxs = np.argsort(-stds)
+        # print(stds[idxs[:nums_to_select]])
+        selection[idxs[:nums_to_select]] = True
+        return selection
+
+    def select_top_data_NLVM_2(self, pred_score, nums_to_select, percent_P = 0.1, percent_N = 0.1):
+        # pred_score = pred_score.T # if necessary
+        # 方案2, 求最近的P%样本的方差
+        N_u,N_l = pred_score.shape
+        stds = np.zeros(N_u)
+        selection = np.zeros(N_u,'bool')
+        # 求最近的P%样本的方差
+        for i in range(N_u):
+            score = pred_score[i]
+            # 求k近邻
+            topk = int(N_l * percent_P)
+            topk_idxs = np.argpartition(score,topk)[:topk]
+            stds[i] = score[topk_idxs].std()
+        # 根据方差排序
+        idxs = np.argsort(-stds)
+        # print(stds[idxs[:nums_to_select]])
+        selection[idxs[:nums_to_select]] = True
+        return selection
 
     def select_top_data3(self, pred_score, nums_to_select,id_num,pred_y,u_data):
         total_number = 0
