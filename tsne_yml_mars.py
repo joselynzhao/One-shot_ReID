@@ -20,7 +20,7 @@ sns.set_context("notebook", font_scale=1.5,
 
 markers = ['o', 'v', 's', 'p', '*', 'h',  'D', 'd', 'P', 'X']
 #%%
-def scatter(fts_gp, lbs_gp,cams,lbs):
+def scatter(fts_gp, lbs_gp,cams,lbs,labeled,labeled_lbs):
     # We choose a color palette with seaborn.
     palette = np.array(sns.color_palette("hls", np.unique(lbs).shape[0]))
 
@@ -29,7 +29,8 @@ def scatter(fts_gp, lbs_gp,cams,lbs):
     for i,(ft,lb) in enumerate(zip(fts_gp,lbs_gp)):
         sc = plt.scatter(ft[:,0], ft[:,1], lw=0, s=4,
                         c=palette[lb.astype(np.int)],marker=markers[i])
-
+    plt.scatter(labeled[:,0], labeled[:,1], lw=0, s=2,
+                        c='black',marker='.')
 # %%
 fts = np.load('logs/mars/Dissimilarity_step_50_fts.npy')
 lbs = np.load('logs/mars/Dissimilarity_step_50_lbs.npy')
@@ -46,8 +47,8 @@ for cam in np.unique(cams):
     fts_gp.append(proj[cam_idx])
     lbs_gp.append(lbs[cam_idx])
 # %%
-scatter(fts_gp, lbs_gp,np.unique(cams),lbs)
-plt.savefig('logs/mars/all_feas_tsne-generated.jpg', dpi=400,facecolor='white')
+scatter(fts_gp, lbs_gp,np.unique(cams),lbs,proj[:625],lbs[:625])
+plt.savefig('logs/mars/all_feas_tsne-generated.svg', dpi=400,facecolor='white')
 plt.show()
 
 # %%
