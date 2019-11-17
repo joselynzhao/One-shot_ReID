@@ -17,7 +17,7 @@
 #python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_1/  --yita 1  --mode Dissimilarity --max_frames 900 --device 0  -b 128  #验证作者的方法
 #python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_100/  --yita 100  --mode Dissimilarity --max_frames 900 --device 1 -b 128
 #python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_200/  --yita 200  --mode Dissimilarity --max_frames 900 --device 2  -b 128
-python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_300_10/  --yita 300  --mode Dissimilarity --max_frames 900  -b 128  --device 6
+python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_400/  --yita 400  --mode Dissimilarity --max_frames 100  -b 16
 #python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_600/  --yita 600  --mode Dissimilarity --max_frames 900  -b 128  --device 4
 
 #python3.6 run_gradully.py --dataset mars --logs_dir logs/mars_gradually20_0/  --EF 5 --q  1 --mode Dissimilarity --max_frames 900 --device 5  -b 128 #验证作者的方法
