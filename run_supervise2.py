@@ -106,15 +106,20 @@ import  codecs
 def main(args):
     # gd = gif_drawer2()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
     save_path = args.logs_dir
     total_step = math.ceil(math.pow((100 / args.EF), (1 / args.q))) + 1  # 这里应该取上限或者 +2  多一轮进行one-shot训练的
     print("total_step:{}".format(total_step))
-    sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'))
-    data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
+    sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.EF)+"_"+ str(args.q) + '.txt'))
+    data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.EF)+"_"+ str(args.q) + '.txt'),mode='a')
+
+    '''记录该轮训练的参数信息'''
+    parameter_file = codecs.open(osp.join(args.logs_dir,'parameter.txt'),mode='a')
+    parameter_file.write("total_step:{} EF:{} q:{} epoch:{} max_frame:{} batch_size:{} dataset:{}".format(total_step,args.EF,args.q,args.epoch,args.max_frames,args.batch_size,args.dataset))
+    parameter_file.close()
     # time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
 
     # get all the labeled and unlabeled data for training
@@ -123,7 +128,7 @@ def main(args):
     # l_data, u_data = get_one_shot_in_cam2(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
     #     dataset_all.name))
     # num_all_examples = len(dataset_all.train)
-    l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
+    l_data, u_data = get_one_shot_in_cam2(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
         dataset_all.name))
     resume_step, ckpt_file = -1, ''
     if args.resume:  # 重新训练的时候用
@@ -142,10 +147,9 @@ def main(args):
     nums_to_select = 0
     while(not isout):
         # onetimeS = time.time()
-        print("This is running {} with EF ={}%, q = {} step {}: \t Logs-dir {}".format(
-            args.mode, args.EF, args.q, step+1, save_path))
+        print("total_step:{} EF:{} q:{} epoch:{} max_frame:{} batch_size:{} dataset:{}".format(total_step,args.EF,args.q,args.epoch,args.max_frames,args.batch_size,args.dataset))
         # onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        eug.train(new_train_data, step, epochs=args.epoch, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
 
         mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
@@ -188,4 +192,5 @@ if __name__ == '__main__':
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
     parser.add_argument('--max_frames', type=int, default=100)
+    parser.add_argument('--epoch', type=int, default=70)
     main(parser.parse_args())
