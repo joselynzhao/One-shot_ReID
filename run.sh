@@ -8,20 +8,7 @@
 # if you need to resume 
 #python3.6 run3.py --dataset mars --logs_dir logs/mars_EF_10_q_1_pro/ --EF 10 --q 1 --mode Dissimilarity --max_frames 100
 
-#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_1/  --yita 1 --mode Dissimilarity --max_frames 900 --device 0  # 验证作者的方法
-#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_50/  --yita 50  --mode Dissimilarity --max_frames 900 --device 0
-#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_100/  --yita 100  --mode Dissimilarity --max_frames 900 --device 1
-#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_200/  --yita 200  --mode Dissimilarity --max_frames 900 --device 2
-#python3.6 run3.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_yita70JZ_300/  --yita 300  --mode Dissimilarity --max_frames 900 --device 3
 
-#python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_1/  --yita 1  --mode Dissimilarity --max_frames 900 --device 0  -b 128  #验证作者的方法
-#python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_100/  --yita 100  --mode Dissimilarity --max_frames 900 --device 1 -b 128
-#python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_200/  --yita 200  --mode Dissimilarity --max_frames 900 --device 2  -b 128
-python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_400/  --yita 400  --mode Dissimilarity --max_frames 100  -b 16
-#python3.6 run3.py --dataset mars --logs_dir logs/mars_yita70JZ_600/  --yita 600  --mode Dissimilarity --max_frames 900  -b 128  --device 4
 
-#python3.6 run_gradully.py --dataset mars --logs_dir logs/mars_gradually20_0/  --EF 5 --q  1 --mode Dissimilarity --max_frames 900 --device 5  -b 128 #验证作者的方法
-#python3.6 run_gradully.py --dataset mars --logs_dir logs/mars_gradually20_1/  --EF 1.1 --q  1.5 --mode Dissimilarity --max_frames 900 --device 4  -b 128 #验证作者的方法
-#python3.6 run_gradully.py --dataset mars --logs_dir logs/mars_gradually20_2/  --EF 0.055 --q  2.5 --mode Dissimilarity --max_frames 900 --device 5  -b 128 #验证作者的方法
-#python3.6 run_gradully.py --dataset mars --logs_dir logs/mars_gradually20_3/  --EF 22.3 --q  0.5 --mode Dissimilarity --max_frames 900 --device 6  -b 128 #验证作者的方法
-#python3.6 run_gradully.py --dataset mars --logs_dir logs/mars_gradually20_4/  --EF 30 --q  0.4 --mode Dissimilarity --max_frames 900 --device 7  -b 128 #验证作者的方法
+
+python3.6 run_supervise2.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_supervise20_step2_EF2/ --EF 2 --q 1 --mode Dissimilarity --max_frames 400

@@ -3,5 +3,6 @@ import numpy as np
 
 
 if __name__=="__main__":
-    b = np.load("logs/l_feas/test1.npy")
-    print(b)
+    for i in  range(1,9):
+        print(i)
+    # print(a)

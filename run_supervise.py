@@ -1,4 +1,3 @@
-
 from __future__ import print_function, absolute_import
 from reid.eug import *
 from reid import datasets
@@ -51,39 +50,33 @@ def resume(args):
 class gif_drawer2():
     def __init__(self):
         plt.ion()
-        self.select_num_percent = [0, 0]
+        self.step = [0,0]
         self.top1 = [0, 0]
         # self.select_num_percent =[0,0]
         self.mAP = [0,0]
-        self.label_pre = [0,0]
-        self.select_pre = [0,1]
+
         self.flag = 0
         # plt.legend(loc="upper left")
 
-    def draw(self, update_x, update_top1,mAP,label_pre,select_pre):
-        self.select_num_percent[0] = self.select_num_percent[1]
+    def draw(self, update_x, update_top1,mAP):
+
         self.top1[0] = self.top1[1]
+        self.step[0] = self.step[1]
         # self.select_num_percent[0] = self.select_num_percent[1]
         self.mAP[0] = self.mAP[1]
-        self.label_pre[0] = self.label_pre[1]
-        self.select_pre[0] = self.select_pre[1]
 
-        self.select_num_percent[1] = update_x
+        self.step[1] = update_x
         self.top1[1] = update_top1
         # self.select_num_percent[1] = select_num_percent
         self.mAP[1] = mAP
-        self.label_pre[1] = label_pre
-        self.select_pre[1] = select_pre
+
 
         plt.title("Performance monitoring")
         plt.xlabel("select_percent(%)")
-        plt.ylabel("value(%)"
-                   )
-        plt.plot(self.select_num_percent, self.top1, c="r", marker ='o',label="top1")
+        plt.ylabel("value(%)")
+        plt.plot(self.step, self.top1, c="r", marker ='o',label="top1")
         # plt.plot(self.xs, self.select_num_percent, c="g", marker ='o',label="select_num_percent")
-        plt.plot(self.select_num_percent, self.mAP, c="y", marker ='o',label="mAP")
-        plt.plot(self.select_num_percent, self.label_pre, c="b", marker ='o',label="label_pre")
-        plt.plot(self.select_num_percent, self.select_pre, c="cyan", marker ='o',label="select_pre")
+        plt.plot(self.step, self.mAP, c="y", marker ='o',label="mAP")
         if self.flag==0:
             plt.legend()
             self.flag=1
@@ -100,9 +93,9 @@ def changetoHSM(secends):
 import os
 import  codecs
 def main(args):
-    # gd = gif_drawer2()
+    gd = gif_drawer2()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "5"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     print("game begin!")
     cudnn.benchmark = True
     cudnn.enabled = True
@@ -111,13 +104,16 @@ def main(args):
     print("total_step:{}".format(total_step))
     sys.stdout = Logger(osp.join(args.logs_dir, 'log' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'))
     data_file =codecs.open(osp.join(args.logs_dir,'data' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
-    time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
+    # time_file =codecs.open(osp.join(args.logs_dir,'time' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S") + '.txt'),'a')
+
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
-    num_all_examples = len(dataset_all.train)
+    # num_all_examples = len(dataset_all.train)
+    # l_data, u_data = get_one_shot_in_cam2(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
+    #     dataset_all.name))
+    # num_all_examples = len(dataset_all.train)
     l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
         dataset_all.name))
-
     resume_step, ckpt_file = -1, ''
     if args.resume:  # 重新训练的时候用
         resume_step, ckpt_file = resume(args)
@@ -130,78 +126,45 @@ def main(args):
     nums_to_select = 0
     new_train_data = l_data
     step = 0
-    # to_list = []
     step_size = []
-    base_step = args.bs
-    top_list = []  # top1
-    isout = 0  #用来标记是否应该结束训练
-    # data_file = open("")
-    start_time = time.time()
+    isout = 0  # 用来标记是否应该结束训练
     while(not isout):
-        onetimeS = time.time()
-        print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
-            args.mode, args.EF, args.q, step, nums_to_select, save_path))
-        onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=0, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+        # onetimeS = time.time()
+        print("This is running {} with EF ={}%, q = {} step {}: \t Logs-dir {}".format(
+            args.mode, args.EF, args.q, step+1, save_path))
+        # onetime_trainS = time.time()
+        eug.train(new_train_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
-        onetime_trainE = time.time()
-        onetime_train = onetime_trainE-onetime_trainS
-        h,m,s = changetoHSM(onetime_train)
-        print("joselyn msg: traning is over,cost %02d:%02d:%02.6f" % (h, m, s))
-        # evluate
-        onetime_evaluateS = time.time()
-        # mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
-        onetime_evaluateE = time.time()
-        onetime_evaluate = onetime_evaluateE-onetime_evaluateS
-        h, m, s = changetoHSM(onetime_evaluate)
+
+        mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
         step_size.append(nums_to_select)
-        if nums_to_select==len(u_data):
-            isout=1
-        print("joselyn msg: evaluate is over,cost %02d:%02d:%02.6f" % (h, m, s))
 
-        # pseudo-label and confidence sc
-        nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100),
-                             len(u_data))  # 指数渐进策略
-        onetime_estimateS = time.time()
-        pred_y, pred_score,label_pre,id_num= eug.estimate_label(args.percent_P,args.percent_N)
-        onetime_estimateE = time.time()
-        onetime_estimate = onetime_estimateE-onetime_estimateS
-        h, m, s = changetoHSM(onetime_estimate)
-        print("joselyn msg: estimate labels is over,cost %02d:%02d:%02.6f" % (h, m, s))
-        # select data
-        selected_idx = eug.select_top_data(pred_score, nums_to_select)
-
-        # # NLVM
-        # print("下面是pred_score.shape")
-        # print(pred_score.shape)
-        # selected_idx = eug.select_top_data_NLVM(pred_score, nums_to_select)
+        data_file.write("step:{} nums_to_select:{} top1:{:.2%} mAP:{:.2%} \n".format(int(step), nums_to_select, top1, mAP))
+        print("step:{} nums_to_select:{} top1:{:.2%}  mAP:{:.2%}".format(int(step),nums_to_select, top1, mAP))
 
 
-        # selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data) #for 同比
-        print("joselyn msg: select top data is over")
-        # add new data
-        new_train_data,select_pre = eug.generate_new_train_data(selected_idx,pred_y)
-        # new_train_data,select_pre = eug.generate_new_train_data(selected_idx, pred_y) #for 同比
-        print("joselyn msg: generate new train data is over")
+        if nums_to_select == len(u_data):
+            isout = 1
+        nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100), len(u_data))  # 指数渐进策略
 
-        # gd.draw(step_size[step]/len(u_data),top1,mAP,label_pre,select_pre)
-        onetimeE =time.time()
-        onetime = onetimeE-onetimeS
-        h, m, s = changetoHSM(onetime)
-        # data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
-        time_file.write("step:{} traning:{:.8} evaluate:{:.8} estimate:{:.8} onetime:{:.8}\n".format(int(step),onetime_train,onetime_evaluate,onetime_estimate,onetime))
-        # print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
-        print("onetime cost %02d:%02d:%02.6f" % (h, m, s))
-        step = step + 1
+        # selected_idx = eug.select_top_data(nums_to_select)
+
+
+        new_train_data = eug.generate_new_train_data1(nums_to_select)
+        step = step +1
+
 
     data_file.close()
-    time_file.close()
-    end_time = time.time()
-    alltime = end_time-start_time
-    h, m, s = changetoHSM(alltime)
-    print("alltime cost %02d:%02d:%02.6f" % (h, m, s))
 
-    # gd.saveimage(osp.join(args.logs_dir,'image' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S")))
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
@@ -227,6 +190,4 @@ if __name__ == '__main__':
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
     parser.add_argument('--max_frames', type=int, default=100)
-    parser.add_argument('--percent_P', type=float, default=0.3)
-    parser.add_argument('--percent_N', type=float, default=0.3)
     main(parser.parse_args())

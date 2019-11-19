@@ -156,7 +156,8 @@ def main(args):
         print("This is running {} with step_s ={}%, yita = {} step {}:   Nums_been_selected {},  Logs-dir {}".format(
             args.mode, args.step_s, args.yita, step, nums_to_select, save_path))
         # onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=20, step_size=55, init_lr=0.1) if step != resume_step else eug.resume(
+
+        eug.train(new_train_data, step, epochs=20, step_size=15, init_lr=0.1) if step != resume_step else eug.resume(
             ckpt_file, step)
         # onetime_trainE = time.time()
         # onetime_train = onetime_trainE-onetime_trainS

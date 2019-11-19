@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 def resume(args):
     import re
     pattern = re.compile(r'step_(\d+)\.ckpt')
-    start_step = -1
+    start_step = 50
     ckpt_file = ""
 
     # find start step
@@ -115,91 +115,24 @@ def main(args):
     # get all the labeled and unlabeled data for training
     dataset_all = datasets.create(args.dataset, osp.join(args.data_dir, args.dataset))
     num_all_examples = len(dataset_all.train)
-    l_data, u_data = get_one_shot_in_cam1(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
+    l_data, u_data = get_one_shot_in_cam2(dataset_all, load_path="./examples/oneshot_{}_used_in_paper.pickle".format(
         dataset_all.name))
 
-    resume_step, ckpt_file = -1, ''
-    if args.resume:  # 重新训练的时候用
-        resume_step, ckpt_file = resume(args)
-
         # initial the EUG algorithm
-    eug = EUG(model_name=args.arch, batch_size=args.batch_size, mode=args.mode, num_classes=dataset_all.num_train_ids,
+    eug = EUG(model_name=args.arch, batch_size=1024, mode=args.mode, num_classes=dataset_all.num_train_ids,
               data_dir=dataset_all.images_dir, l_data=l_data, u_data=u_data, save_path=args.logs_dir,
               max_frames=args.max_frames)
 
-    nums_to_select = 0
-    new_train_data = l_data
-    step = 0
-    # to_list = []
-    step_size = []
-    base_step = args.bs
-    top_list = []  # top1
-    isout = 0  #用来标记是否应该结束训练
-    # data_file = open("")
-    start_time = time.time()
-    while(not isout):
-        onetimeS = time.time()
-        print("This is running {} with EF ={}%, q = {} step {}:\t Nums_been_selected {}, \t Logs-dir {}".format(
-            args.mode, args.EF, args.q, step, nums_to_select, save_path))
-        onetime_trainS = time.time()
-        eug.train(new_train_data, step, epochs=20, step_size=15, init_lr=0.1) if step != resume_step else eug.resume(
-            ckpt_file, step)
-        onetime_trainE = time.time()
-        onetime_train = onetime_trainE-onetime_trainS
-        h,m,s = changetoHSM(onetime_train)
-        print("joselyn msg: traning is over,cost %02d:%02d:%02.6f" % (h, m, s))
-        # evluate
-        onetime_evaluateS = time.time()
-        mAP,top1,top5,top10,top20 = eug.evaluate(dataset_all.query, dataset_all.gallery)
-        onetime_evaluateE = time.time()
-        onetime_evaluate = onetime_evaluateE-onetime_evaluateS
-        h, m, s = changetoHSM(onetime_evaluate)
-        step_size.append(nums_to_select)
-        if nums_to_select==len(u_data):
-            isout=1
-        print("joselyn msg: evaluate is over,cost %02d:%02d:%02.6f" % (h, m, s))
-
-        # pseudo-label and confidence sc
-        nums_to_select = min(math.ceil(len(u_data) * math.pow((step + 1), args.q) * args.EF / 100),
-                             len(u_data))  # 指数渐进策略
-        onetime_estimateS = time.time()
-        pred_y, pred_score,label_pre,id_num= eug.estimate_label()
-        onetime_estimateE = time.time()
-        onetime_estimate = onetime_estimateE-onetime_estimateS
-        h, m, s = changetoHSM(onetime_estimate)
-        print("joselyn msg: estimate labels is over,cost %02d:%02d:%02.6f" % (h, m, s))
-        # select data
-        selected_idx = eug.select_top_data(pred_score, nums_to_select)
-        # selected_idx = eug.select_top_data(pred_score, nums_to_select,id_num,pred_y,u_data) #for 同比
-        print("joselyn msg: select top data is over")
-        # add new data
-        new_train_data,select_pre = eug.generate_new_train_data(selected_idx,pred_y)
-        # new_train_data,select_pre = eug.generate_new_train_data(selected_idx, pred_y) #for 同比
-        print("joselyn msg: generate new train data is over")
-
-        # gd.draw(step_size[step]/len(u_data),top1,mAP,label_pre,select_pre)
-        onetimeE =time.time()
-        onetime = onetimeE-onetimeS
-        h, m, s = changetoHSM(onetime)
-        data_file.write("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}\n".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
-        time_file.write("step:{} traning:{:.8} evaluate:{:.8} estimate:{:.8} onetime:{:.8}\n".format(int(step),onetime_train,onetime_evaluate,onetime_estimate,onetime))
-        print("step:{} top1:{:.2%} nums_selected:{} selected_percent:{:.2%} mAP:{:.2%} label_pre:{:.2%} select_pre:{:.2%}".format(int(step),top1,step_size[step],step_size[step]/len(u_data),mAP,label_pre,select_pre))
-        print("onetime cost %02d:%02d:%02.6f" % (h, m, s))
-        step = step + 1
-
-    data_file.close()
-    time_file.close()
-    end_time = time.time()
-    alltime = end_time-start_time
-    h, m, s = changetoHSM(alltime)
-    print("alltime cost %02d:%02d:%02.6f" % (h, m, s))
-
-    # gd.saveimage(osp.join(args.logs_dir,'image' + str(args.EF)+"_"+ str(args.q) + time.strftime(".%m_%d_%H-%M-%S")))
-
-
-
-
-
+    eug.resume('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50.ckpt', 50)
+    print('Extracting features...')
+    fts,lbs,cams = eug.get_feature_with_labels_cams(l_data)
+    print('Saving fts...')
+    np.save('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50_fts.npy',fts)
+    print('Saving lbs...')
+    np.save('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50_lbs.npy',lbs)
+    print('Saving cams...')
+    np.save('logs/DukeMTMC-VideoReID_supervise20_step2_EF2/Dissimilarity_step_50_cams.npy',cams)
+    print('Done.')
 
 
 
@@ -208,9 +141,9 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Exploit the Unknown Gradually')
-    parser.add_argument('-d', '--dataset', type=str, default='mars',
+    parser.add_argument('-d', '--dataset', type=str, default='DukeMTMC-VideoReID',
                         choices=datasets.names())
-    parser.add_argument('-b', '--batch-size', type=int, default=16)
+    parser.add_argument('-b', '--batch-size', type=int, default=1024)
     parser.add_argument('-a', '--arch', type=str, default='avg_pool',
                         choices=models.names())
     parser.add_argument('-i', '--iter-step', type=int, default=5)
@@ -224,7 +157,7 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str, metavar='PATH',
                         default=os.path.join(working_dir, 'data'))
     parser.add_argument('--logs_dir', type=str, metavar='PATH',
-                        default=os.path.join(working_dir, 'logs'))
+                        default='logs/DukeMTMC-VideoReID_supervise20_step2_EF2/')
     parser.add_argument('--resume', type=str, default=None)
     parser.add_argument('--continuous', action="store_true")
     parser.add_argument('--mode', type=str, choices=["Classification", "Dissimilarity"], default="Dissimilarity")
