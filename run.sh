@@ -1,12 +1,13 @@
+# experiments_name : NLVM-b1
+#python3.6 nlvm.py --exp_order 0 --percent_vari 1
+#python3.6 nlvm.py --exp_order 1 --percent_vari 0.9
+#python3.6 nlvm.py --exp_order 2 --percent_vari 0.8
+#python3.6 nlvm.py --exp_order 0 --percent_vari 0.8  --exp_name test  --epoch 0
 
-# run DukeMTMC-VideoReID
-#python3.6 run2.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_AP_bs_50/  --mode Dissimilarity --max_frames 400  --bs 50
-#python3.6 run.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_EF_20_q_1/ --EF 20 --q 1.5 --mode Dissimilarity --max_frames 100 --resume logs/DukeMTMC_VideoReID_EF_20_q_1/
 
-# run mars
-#python3.6 run.py --dataset mars --logs_dir logs/mars_EF_10/ --EF 10 --mode Dissimilarity --max_frames 100
 
-# if you need to resume 
-#python3.6 run3.py --dataset mars --logs_dir logs/mars_EF_10_q_1_pro/ --EF 10 --q 1 --mode Dissimilarity --max_frames 100
-
-python3.6 NLVM.py --dataset DukeMTMC-VideoReID --logs_dir logs/DukeMTMC-VideoReID_NLVM1112/ --EF 5 --q 1 --mode Dissimilarity --max_frames 400  --percent_P 1.0
+# experiments_name : NLVM-b2
+#python3.6 nlvm-b2.py --exp_order 1  --exp_name nlvm-b2   --stop_vari_step 8
+#python3.6 nlvm-b2.py --exp_order 2  --exp_name nlvm-b2   --stop_vari_step 7
+python3.6 nlvm-b2.py --exp_order 3  --exp_name nlvm-b2   --stop_vari_step 6  --resume Ture
+python3.6 nlvm-b2.py --exp_order 4  --exp_name nlvm-b2   --stop_vari_step 5
